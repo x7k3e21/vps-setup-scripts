@@ -17,6 +17,8 @@ cp -R ./scripts $WIREGUARD_CONFIG_DIR
 
 chmod 600 -R $WIREGUARD_CONFIG_DIR
 
+ip link add dev wg0 type wireguard
+
 SYSCTL_CONFIG=/etc/sysctl.d/wg.conf
 
 echo "net.ipv4.ip_forward = 1" > $SYSCTL_CONFIG

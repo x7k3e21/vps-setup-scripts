@@ -13,11 +13,20 @@ SERVER_PUBLIC_KEY="${WIREGUARD_CONFIG_DIR}/keys/public.key"
 wg genkey | tee $SERVER_PRIVATE_KEY | wg pubkey > $SERVER_PUBLIC_KEY
 
 cp ./server/wg0.conf $WIREGUARD_CONFIG_DIR/wg0.conf
+
 cp -R ./scripts $WIREGUARD_CONFIG_DIR
 
-chmod 600 -R $WIREGUARD_CONFIG_DIR
+chmod +X $WIREGUARD_CONFIG_DIR/scripts/postup.sh
+chmod +X $WIREGUARD_CONFIG_DIR/scripts/postdown.sh
 
-ip link add dev wg0 type wireguard
+WIREGUARD_CLIENT_NAME=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
+
+mkdir -p $WIREGUARD_CONFIG_DIR/clients/$WIREGUARD_CLIENT_NAME/keys
+
+CLIENT_PRIVATE_KEY="${WIREGUARD_CONFIG_DIR}/clients/${WIREGUARD_CLIENT_NAME}/keys/private.key"
+CLIENT_PUBLIC_KEY="${WIREGUARD_CONFIG_DIR}/clients/${WIREGUARD_CLIENT_NAME}/keys/public.key"
+
+chmod 600 -R $WIREGUARD_CONFIG_DIR
 
 SYSCTL_CONFIG=/etc/sysctl.d/wg.conf
 
@@ -25,6 +34,8 @@ echo "net.ipv4.ip_forward = 1" > $SYSCTL_CONFIG
 echo "net.ipv6.conf.all.forwarding = 1" >> $SYSCTL_CONFIG
 
 sysctl --load $SYSCTL_CONFIG
+
+wg-quick up $WIREGUARD_CONFIG_DIR/wg0.conf
 
 systemctl enable wg-quick@wg0.service
 systemctl start wg-quick@wg0.service

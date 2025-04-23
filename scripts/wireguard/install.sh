@@ -1,15 +1,7 @@
 
-#!/bin/sh
+#!/usr/bin/env bash
 
 apt-get install wireguard
-apt-get install qrencode
-
-SYSCTL_CONFIG=/etc/sysctl.d/wg.conf
-
-echo "net.ipv4.ip_forward = 1" >> $SYSCTL_CONFIG
-echo "net.ipv6.conf.all.forwarding = 1" >> $SYSCTL_CONFIG
-
-sysctl --load $SYSCTL_CONFIG
 
 WIREGUARD_CONFIG_DIR=/etc/wireguard
 
@@ -18,7 +10,21 @@ mkdir -p $WIREGUARD_CONFIG_DIR
 SERVER_PRIVATE_KEY="${WIREGUARD_CONFIG_DIR}/keys/private.key"
 SERVER_PUBLIC_KEY="${WIREGUARD_CONFIG_DIR}/keys/public.key"
 
-touch $SERVER_PRIVATE_KEY
-touch $SERVER_PUBLIC_KEY
-
 wg genkey | tee $SERVER_PRIVATE_KEY | wg pubkey > $SERVER_PUBLIC_KEY
+
+cp ./server/wg0.conf $WIREGUARD_CONFIG_DIR/wg0.conf
+cp -R ./scripts $WIREGUARD_CONFIG_DIR
+
+chmod 600 -R $WIREGUARD_CONFIG_DIR
+
+SYSCTL_CONFIG=/etc/sysctl.d/wg.conf
+
+echo "net.ipv4.ip_forward = 1" >> $SYSCTL_CONFIG
+echo "net.ipv6.conf.all.forwarding = 1" >> $SYSCTL_CONFIG
+
+sysctl --load $SYSCTL_CONFIG
+
+systemctl enable "wg-quick@wg0"
+systemctl start "wg-quick@wg0"
+
+apt-get install qrencode

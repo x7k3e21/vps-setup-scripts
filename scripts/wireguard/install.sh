@@ -5,7 +5,7 @@ apt-get install wireguard
 
 WIREGUARD_CONFIG_DIR=/etc/wireguard
 
-mkdir -p $WIREGUARD_CONFIG_DIR
+mkdir -p $WIREGUARD_CONFIG_DIR/keys
 
 SERVER_PRIVATE_KEY="${WIREGUARD_CONFIG_DIR}/keys/private.key"
 SERVER_PUBLIC_KEY="${WIREGUARD_CONFIG_DIR}/keys/public.key"
@@ -23,6 +23,12 @@ echo "net.ipv4.ip_forward = 1" >> $SYSCTL_CONFIG
 echo "net.ipv6.conf.all.forwarding = 1" >> $SYSCTL_CONFIG
 
 sysctl --load $SYSCTL_CONFIG
+
+ip link add dev wg0 type wireguard
+
+wg setconf wg0 $WIREGUARD_CONFIG_DIR/wg0.conf
+
+ip link set up dev wg0
 
 systemctl enable "wg-quick@wg0"
 systemctl start "wg-quick@wg0"

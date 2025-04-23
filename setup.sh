@@ -6,5 +6,5 @@ apt-get update
 
 apt-get upgrade -y
 
-apt-get install iptables
+apt-get install iptables -y
 

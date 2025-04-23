@@ -19,18 +19,12 @@ chmod 600 -R $WIREGUARD_CONFIG_DIR
 
 SYSCTL_CONFIG=/etc/sysctl.d/wg.conf
 
-echo "net.ipv4.ip_forward = 1" >> $SYSCTL_CONFIG
+echo "net.ipv4.ip_forward = 1" > $SYSCTL_CONFIG
 echo "net.ipv6.conf.all.forwarding = 1" >> $SYSCTL_CONFIG
 
 sysctl --load $SYSCTL_CONFIG
 
-ip link add dev wg0 type wireguard
-
-wg setconf wg0 $WIREGUARD_CONFIG_DIR/wg0.conf
-
-ip link set up dev wg0
-
-systemctl enable "wg-quick@wg0"
-systemctl start "wg-quick@wg0"
+systemctl enable wg-quick@wg0.service
+systemctl start wg-quick@wg0.service
 
 apt-get install qrencode

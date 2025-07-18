@@ -1,0 +1,15 @@
+
+# File: nftables/nftables/system/nft.service
+
+[Unit]
+Description=Set nftables rules at startup
+After=default.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/nftables.conf
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target
